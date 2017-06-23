@@ -3,24 +3,20 @@ package com.clt.demo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.ImageView;
+
 
 import com.clt.demo.util.Base64Utils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.sql.Blob;
+
 
 public class MainActivity extends AppCompatActivity {
     public WebView webView = null;
@@ -40,27 +36,42 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        webView = (WebView) findViewById(R.id.webView);
         //初始化webview
         initWebView("file:///android_asset/index.html");
-        //提供js调用
-        webView.addJavascriptInterface(new JSInterface(),"Android");
-
 
         btn = (Button)findViewById(R.id.button2);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String b = "javascript:changeImg("+"'"+"img/1.jpg"+"'"+")";
-//                webView.loadUrl(b);
-                webView.loadUrl("javascript:changeImg("+"'"+"data:image/png;base64,"+a+"'"+")");
-                webView.loadUrl("javascript:changeText("+"'"+"我是"+"',"+"'"+"你是"+"'"+")");
+//                webView.loadUrl("javascript:changeImg("+"'"+"data:image/png;base64,"+a+"'"+")");
+//                webView.loadUrl("javascript:changeText("+"'"+"我是"+"',"+"'"+"你是"+"'"+")");
+
+                webView.loadUrl("javascript:changeImg("+"'"+"data:image/png;base64,"+srcbase+"'"+")");
+                webView.loadUrl("javascript:changeText("+"'"+msJurId+"',"+"'"+employeId+"'"+")");
             }
         });
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = getIntent();
+        bmp = intent.getParcelableExtra("bitmap");
+
+        if(bmp!=null){
+            srcbase = Base64Utils.ESSGetBase64Encode(bitmapTobyte(bmp));
+            Bundle bundle = intent.getExtras();
+            msJurId = bundle.getString("arg1");
+            employeId = bundle.getString("arg2");
+        }
+
+        webView.loadUrl("javascript:changeImg("+"'"+"data:image/png;base64,"+srcbase+"'"+")");
+        webView.loadUrl("javascript:changeText("+"'"+msJurId+"',"+"'"+employeId+"'"+")");
     }
 
     private void initWebView(String url) {
-        webView = (WebView) findViewById(R.id.webView);
+
         WebSettings webSettings = webView.getSettings();
         //设置WebView属性，能够执行Javascript脚本
         webSettings.setJavaScriptEnabled(true);
@@ -89,38 +100,19 @@ public class MainActivity extends AppCompatActivity {
 //
 //            }
         });
+        //提供js调用
+        webView.addJavascriptInterface(new JSInterface(),"Android");
     }
     @Override
     protected void onResume() {
         super.onResume();
 
-        Intent intent = getIntent();
-        bmp = intent.getParcelableExtra("bitmap");
 
-        //授权信息id
-//            msJurId = intent.getParcelableExtra("msJurId");
-        //员工id
-//            employeId = intent.getParcelableExtra("employeId");
-        if(bmp!=null){
-            srcbase = Base64Utils.ESSGetBase64Encode(bitmapTobyte(bmp));
-            Bundle bundle = intent.getExtras();
-            msJurId = bundle.getString("arg1");
-            employeId = bundle.getString("arg2");
-        }
-
-        StringBuffer args = new StringBuffer();
-        args.append("javascript:changeImg(");
-        args.append("'data:image/png;base64, "+srcbase+"', ");
-        args.append("'"+msJurId+"', ");
-        args.append("'"+employeId+"' ");
-
-        args.append(")");
-        String b = args.toString();
 //        webView.loadUrl(args.toString());
 //        webView.loadUrl("javascript:changeImg("+"'"+"data:image/png;base64,"+srcbase+"'"+")");
-        webView.loadUrl("javascript:changeImg("+"'"+"data:image/png;base64,"+a+"'"+")");
-        webView.loadUrl("javascript:changeText("+"'"+msJurId+"',"+"'"+employeId+"'"+")");
+
     }
+
 
     public byte[] bitmapTobyte(Bitmap bitmap){
         ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象
