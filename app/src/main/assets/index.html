@@ -14,7 +14,9 @@
 
 
 <input type="button" value="盖章" onclick="window.Android.cellSeal()"/>
+
 <input type="button" value="改变图片" onclick="changeImg('img/1.jpg')"/>
+
 <input type="button" value="改变文字" onclick="changeText('23456','123')"/>
 
 
@@ -22,7 +24,7 @@
 
 <br/>
 
-<img id="sealImg" src="img/2.png" alt="找不到图片" />
+<img id="sealImg" src="img/2.png" alt="找不到图片" style="display:none" />
 
 <div class="container">
     <div class="row">
@@ -45,6 +47,7 @@
 
     function changeImg(arg0){
         var element = document.getElementById('sealImg');
+        element.style.display = "inline";
         element.src = arg0;
 
     }
